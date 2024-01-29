@@ -41,7 +41,7 @@ jobs:
     name: Release :dev image
     runs-on: ubuntu-20.04
     needs: latest-tag-sha
-    if: (needs['latest-tag-sha'].outputs.sha != github.sha)
+    if: true
     steps:
       - name: Check out the repo
         uses: actions/checkout@v4
