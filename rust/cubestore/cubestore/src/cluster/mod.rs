@@ -173,6 +173,7 @@ crate::di_service!(MockCluster, [Cluster]);
 pub enum JobEvent {
     Started(RowKey, JobType),
     Success(RowKey, JobType),
+    Orphaned(RowKey, JobType),
     Error(RowKey, JobType, String),
 }
 
@@ -267,6 +268,10 @@ impl WorkerProcessing for WorkerProcessor {
             func(config);
         }
         Ok(())
+    }
+
+    fn is_single_job_process() -> bool {
+        false
     }
 
     async fn process(
@@ -815,6 +820,10 @@ impl JobResultListener {
                             new.get_row().row_reference().clone(),
                             new.get_row().job_type().clone(),
                             "Job timed out".to_string(),
+                        )),
+                        JobStatus::Orphaned => Some(JobEvent::Orphaned(
+                            new.get_row().row_reference().clone(),
+                            new.get_row().job_type().clone(),
                         )),
                         JobStatus::Error(e) => Some(JobEvent::Error(
                             new.get_row().row_reference().clone(),
